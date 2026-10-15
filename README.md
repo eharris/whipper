@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/github/license/whipper-team/whipper.svg)](https://github.com/whipper-team/whipper/blob/develop/LICENSE)
 [![Build Status](https://travis-ci.com/whipper-team/whipper.svg?branch=develop)](https://travis-ci.com/whipper-team/whipper)
 [![GitHub (pre-)release](https://img.shields.io/github/release/whipper-team/whipper/all.svg)](https://github.com/whipper-team/whipper/releases/latest)
-[![IRC](https://img.shields.io/badge/irc-%23whipper%40freenode-brightgreen.svg)](https://webchat.freenode.net/?channels=%23whipper)
+[![IRC](https://img.shields.io/badge/irc-%23whipper%40libera.chat-brightgreen.svg)](https://web.libera.chat/?channels=%23whipper)
 [![GitHub Stars](https://img.shields.io/github/stars/whipper-team/whipper.svg)](https://github.com/whipper-team/whipper/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/whipper-team/whipper.svg)](https://github.com/whipper-team/whipper/issues)
 [![GitHub contributors](https://img.shields.io/github/contributors/whipper-team/whipper.svg)](https://github.com/whipper-team/whipper/graphs/contributors)
@@ -271,6 +271,9 @@ cdparanoia = cdparanoia			; cdparanoia executable to use.  Default is cd-paranoi
 					; cd-paranoia has a bug that makes drives with large read_offset
 					; unusable, see https://github.com/whipper-team/whipper/issues/234
 
+# top-level whipper arguments go in [whipper]; subcommand arguments go in [whipper.subcommand...]
+[whipper]
+eject = always
 
 # command line defaults for `whipper cd rip`
 [whipper.cd.rip]
@@ -302,24 +305,8 @@ The available plugins can be listed with `whipper cd rip -h`. Specify a logger t
 whipper cd rip -L eac
 ```
 
-Whipper searches for logger plugins in the following paths:
-
-- `$XDG_DATA_HOME/whipper/plugins`
-- Paths returned by the following Python instruction:
-
-  `[x + '/whipper/plugins' for x in site.getsitepackages()]`
-
-- If whipper is run in a `virtualenv`, it will use these alternative instructions (from `distutils.sysconfig`):
-  - `get_python_lib(plat_specific=False, standard_lib=False, prefix='/usr/local') + '/whipper/plugins'`
-  - `get_python_lib(plat_specific=False, standard_lib=False) + '/whipper/plugins'`
-
-On a default Debian/Ubuntu installation, the following paths are searched by whipper:
-
-- `$HOME/.local/share/whipper/plugins`
-- `/usr/local/lib/python3.X/dist-packages/whipper/plugins`
-- `/usr/lib/python3.X/dist-packages/whipper/plugins`
-
-Where `X` stands for the minor version of the Python 3 release available on the system.
+Whipper searches for logger plugins using `importlib.metadata.entry_points`, meaning any package visible to the Python
+interpreter exporting a `whipper.logger` entry point will be loaded.
 
 Please note that locally installed logger plugins won't be recognized when whipper has been installed through the official Docker image.
 

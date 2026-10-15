@@ -388,8 +388,8 @@ Log files will log the path to tracks relative to this directory.
                                         self.program.metadata)
         dirname = os.path.dirname(discName)
         if os.path.exists(dirname):
-            logs = glob.glob(os.path.join(glob.escape(dirname), '*.log'))
-            if logs:
+            log_file = discName + '.log'
+            if os.path.exists(log_file):
                 msg = ("output directory %s is a finished rip" % dirname)
                 logger.debug(msg)
                 raise RuntimeError(msg)
@@ -513,8 +513,7 @@ Log files will log the path to tracks relative to this directory.
                     else:
                         raise RuntimeError("track can't be ripped. "
                                            "Rip attempts number is equal "
-                                           "to %d",
-                                           self.options.max_retries)
+                                           "to {}".format(self.options.max_retries))
                 if trackResult in self.skipped_tracks:
                     print("Skipping CRC comparison for track %d "
                           "due to rip failure" % number)
@@ -538,10 +537,13 @@ Log files will log the path to tracks relative to this directory.
                                  'threshold, disregarding', trackResult.peak)
                     self.itable.setFile(1, 0, None,
                                         self.itable.getTrackStart(1), number)
-                    logger.debug('unlinking %r', trackResult.filename)
-                    os.unlink(trackResult.filename)
+                    if os.path.exists(trackResult.filename):
+                        logger.debug('unlinking %r', trackResult.filename)
+                        os.unlink(trackResult.filename)
+                        logger.info('HTOA discarded, contains digital silence')
+                    else:
+                        logger.info('HTOA could not be ripped, discarded')
                     trackResult.filename = None
-                    logger.info('HTOA discarded, contains digital silence')
                 else:
                     self.itable.setFile(1, 0, trackResult.filename,
                                         self.itable.getTrackStart(1), number)
